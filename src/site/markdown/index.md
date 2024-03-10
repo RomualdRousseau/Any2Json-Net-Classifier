@@ -1,6 +1,6 @@
 # About Any2Json Net Classifier
 
-Any2Json module to tag tabular output implementing embeddings.
+Any2Json plugin to tag tabular output implementing embeddings.
 
 ## Description
 

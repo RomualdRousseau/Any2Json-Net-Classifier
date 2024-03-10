@@ -8,7 +8,7 @@
 
     <name>any2json-net-classifier</name>
     <description>
-        Any2Json module to tag tabular output implementing embeddings.
+        Any2Json plugin to tag tabular output implementing embeddings.
     </description>
     <url>https://github.com/romualdrousseau/any2json-net-classifier</url>
 

@@ -7,7 +7,7 @@
 ![Test](https://github.com/RomualdRousseau/Any2Json-Net-Classifier/actions/workflows/build-and-test.yml/badge.svg)
 ![Build](https://github.com/RomualdRousseau/Any2Json-Net-Classifier/actions/workflows/build-and-deploy.yml/badge.svg)
 
-Any2Json module to tag tabular output implementing embeddings.
+Any2Json plugin to tag tabular output implementing embeddings.
 
 ## Description
 
