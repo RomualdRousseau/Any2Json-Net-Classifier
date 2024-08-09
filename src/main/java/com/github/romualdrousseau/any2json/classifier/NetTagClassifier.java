@@ -21,6 +21,7 @@ import org.tensorflow.types.TFloat32;
 
 import com.github.romualdrousseau.any2json.HeaderTag;
 import com.github.romualdrousseau.any2json.Model;
+import com.github.romualdrousseau.any2json.TagClassifier;
 import com.github.romualdrousseau.any2json.util.Disk;
 import com.github.romualdrousseau.any2json.util.TempFile;
 import com.github.romualdrousseau.shuju.commons.PythonManager;
@@ -47,14 +48,13 @@ public class NetTagClassifier extends SimpleTagClassifier {
     private final Text.IHasher hasher;
     private final boolean isModelTemp;
 
-    private Model model;
     private Path modelPath;
     private SavedModelBundle tagClassifierModel;
     private SessionFunction tagClassifierFunc;
 
     public NetTagClassifier(final List<String> vocabulary, final int ngrams, final int wordMinSize,
             final List<String> lexicon, final Path modelPath) {
-        super(null);
+        super(null, TagClassifier.TagStyle.NONE);
         this.vocabulary = vocabulary;
         this.ngrams = ngrams;
         this.wordMinSize = wordMinSize;
@@ -62,13 +62,12 @@ public class NetTagClassifier extends SimpleTagClassifier {
         this.tokenizer = (ngrams == 0) ? new ShingleTokenizer(this.lexicon, this.wordMinSize)
                 : new NgramTokenizer(ngrams);
         this.hasher = new VocabularyHasher(this.vocabulary);
-        this.modelPath = modelPath;
         this.isModelTemp = false;
+        this.modelPath = modelPath;
     }
 
-    public NetTagClassifier(final Model model) {
-        super(model);
-        this.model = model;
+    public NetTagClassifier(final Model model, final TagClassifier.TagStyle tagStyle) {
+        super(model, tagStyle);
         this.vocabulary = JSON.<String>streamOf(model.toJSON().getArray("vocabulary")).toList();
         this.ngrams = model.toJSON().getInt("ngrams");
         this.wordMinSize = model.toJSON().getInt("wordMinSize");
@@ -76,8 +75,17 @@ public class NetTagClassifier extends SimpleTagClassifier {
         this.tokenizer = (this.ngrams == 0) ? new ShingleTokenizer(this.lexicon, this.wordMinSize)
                 : new NgramTokenizer(this.ngrams);
         this.hasher = new VocabularyHasher(this.vocabulary);
-        this.modelPath = null;
         this.isModelTemp = true;
+        this.modelPath = null;
+    }
+
+    @Override
+    protected void updateModel() {
+        this.model.toJSON().setArray("vocabulary", JSON.arrayOf(this.vocabulary));
+        this.model.toJSON().setInt("ngrams", this.ngrams);
+        this.model.toJSON().setInt("wordMinSize", this.wordMinSize);
+        this.model.toJSON().setArray("lexicon", JSON.arrayOf(this.lexicon));
+        this.model.toJSON().setString("model", this.modelToJSONString(this.modelPath));
     }
 
     @Override
@@ -90,16 +98,6 @@ public class NetTagClassifier extends SimpleTagClassifier {
         if (this.modelPath != null && this.isModelTemp) {
             Disk.deleteDir(modelPath);
         }
-    }
-
-    @Override
-    public void updateModel(final Model model) {
-        this.model = model;
-        this.model.toJSON().setArray("vocabulary", JSON.arrayOf(this.vocabulary));
-        this.model.toJSON().setInt("ngrams", this.ngrams);
-        this.model.toJSON().setInt("wordMinSize", this.wordMinSize);
-        this.model.toJSON().setArray("lexicon", JSON.arrayOf(this.lexicon));
-        this.model.toJSON().setString("model", this.modelToJSONString(this.modelPath));
     }
 
     @Override
